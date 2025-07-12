@@ -1,0 +1,3 @@
+# Deny access to Python scripts directory
+Order Allow,Deny
+Deny from all

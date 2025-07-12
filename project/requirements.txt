@@ -1,0 +1,41 @@
+# Core Chemistry Libraries
+rdkit>=2024.3.0
+chemcrow>=0.3.0
+
+# AI and Language Models
+openai>=0.27.8
+langchain>=0.0.234,<=0.0.275
+tiktoken
+
+# Web and Data Processing
+requests>=2.20
+python-dotenv>=1.0.0
+aiohttp
+
+# Scientific Computing
+numpy>=1.24.0
+pandas
+
+# Chemistry Tools and Databases
+molbloom
+synspace
+rxn4chemistry
+
+# Research and Literature
+paper-qa>=1.1.1
+pypdf
+
+# Utilities
+nest-asyncio
+tqdm
+pydantic>=2.0
+
+# Optional: For advanced features
+streamlit  # For interactive demos
+faiss-cpu  # For similarity search
+duckduckgo-search  # For web search
+wikipedia  # For knowledge retrieval
+
+# Development Tools (optional)
+ipython
+jupyter

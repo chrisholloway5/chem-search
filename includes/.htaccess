@@ -1,0 +1,3 @@
+# Deny access to includes directory
+Order Allow,Deny
+Deny from all

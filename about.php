@@ -220,7 +220,7 @@ require_once 'includes/config.php';
                                 <div class="bg-light p-3 rounded">
                                     <i class="fab fa-github fa-3x text-dark mb-2"></i>
                                     <h6>Open Source</h6>
-                                    <a href="https://github.com/Progressiverobot" target="_blank" class="btn btn-outline-primary">
+                                    <a href="https://github.com/chrisholloway5/chem-search" target="_blank" class="btn btn-outline-primary">
                                         <i class="fab fa-github"></i> GitHub Profile
                                     </a>
                                 </div>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local 3DMol.js Test</title>
+    <!-- Use local 3DMol.js instead of CDN -->
+    <script src="assets/js/3Dmol.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #viewer {
+            width: 800px;
+            height: 600px;
+            border: 2px solid #ddd;
+            margin: 20px auto;
+            display: block;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .controls button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .controls button:hover {
+            background: #0056b3;
+        }
+        .controls button.secondary {
+            background: #6c757d;
+        }
+        .controls button.secondary:hover {
+            background: #545b62;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .log-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .log-content {
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-time {
+            color: #666;
+            margin-right: 10px;
+        }
+        .style-controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .style-controls select {
+            margin: 0 10px;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Local 3DMol.js Library Test</h1>
+        
+        <div id="status" class="status warning">Initializing...</div>
+        
+        <div class="controls">
+            <button onclick="loadWater()">💧 Water (H₂O)</button>
+            <button onclick="loadEthanol()">🍺 Ethanol (C₂H₆O)</button>
+            <button onclick="loadCaffeine()">☕ Caffeine</button>
+            <button onclick="loadAspirin()">💊 Aspirin</button>
+            <button onclick="loadDNA()">🧬 DNA Fragment</button>
+            <button onclick="clearViewer()" class="secondary">🗑️ Clear</button>
+        </div>
+        
+        <div class="style-controls">
+            <label>Style: 
+                <select id="styleSelect" onchange="changeStyle()">
+                    <option value="sphere">Ball & Stick</option>
+                    <option value="stick">Stick</option>
+                    <option value="line">Wireframe</option>
+                    <option value="cartoon">Cartoon</option>
+                </select>
+            </label>
+            
+            <label>Color: 
+                <select id="colorSelect" onchange="changeColor()">
+                    <option value="element">By Element</option>
+                    <option value="spectrum">Spectrum</option>
+                    <option value="chain">By Chain</option>
+                </select>
+            </label>
+            
+            <button onclick="startRotation()">🔄 Auto Rotate</button>
+            <button onclick="stopRotation()" class="secondary">⏹️ Stop</button>
+            <button onclick="resetView()" class="secondary">🎯 Reset View</button>
+        </div>
+        
+        <div id="viewer"></div>
+        
+        <div class="log-container">
+            <h3>📋 Console Log</h3>
+            <div class="log-content" id="log-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let viewer;
+        let isRotating = false;
+        let rotationInterval;
+        
+        function log(message, type = 'info') {
+            console.log(message);
+            const logContent = document.getElementById('log-content');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span><span class="${type}">${message}</span>`;
+            logContent.appendChild(entry);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+        
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM content loaded', 'info');
+            
+            // Check if 3DMol is available
+            if (typeof $3Dmol !== 'undefined') {
+                log('✅ 3DMol.js library loaded successfully from local file', 'success');
+                log('3DMol version: ' + ($3Dmol.version || 'Unknown'), 'info');
+                updateStatus('3DMol.js library loaded successfully', 'success');
+                
+                try {
+                    // Initialize viewer
+                    const element = document.getElementById('viewer');
+                    viewer = $3Dmol.createViewer(element, {
+                        backgroundColor: 'white',
+                        antialias: true
+                    });
+                    
+                    log('✅ 3D viewer created successfully', 'success');
+                    updateStatus('3D viewer initialized and ready', 'success');
+                    
+                    // Load a default molecule
+                    loadWater();
+                    
+                } catch (error) {
+                    log('❌ Error creating viewer: ' + error.message, 'error');
+                    updateStatus('Error creating 3D viewer: ' + error.message, 'error');
+                }
+                
+            } else {
+                log('❌ 3DMol.js library not found', 'error');
+                updateStatus('3DMol.js library failed to load', 'error');
+            }
+        });
+        
+        function loadWater() {
+            if (!viewer) return;
+            
+            try {
+                log('Loading water molecule...', 'info');
+                viewer.clear();
+                
+                // Add water atoms
+                viewer.addAtom({elem: 'O', x: 0, y: 0, z: 0});
+                viewer.addAtom({elem: 'H', x: 0.76, y: 0.59, z: 0});
+                viewer.addAtom({elem: 'H', x: -0.76, y: 0.59, z: 0});
+                
+                // Add bonds
+                viewer.addBond({from: 0, to: 1, order: 1});
+                viewer.addBond({from: 0, to: 2, order: 1});
+                
+                applyCurrentStyle();
+                viewer.zoomTo();
+                viewer.render();
+                
+                log('✅ Water molecule loaded successfully', 'success');
+                
+            } catch (error) {
+                log('❌ Error loading water: ' + error.message, 'error');
+            }
+        }
+        
+        function loadEthanol() {
+            if (!viewer) return;
+            
+            try {
+                log('Loading ethanol molecule...', 'info');
+                viewer.clear();
+                
+                // Add ethanol atoms
+                viewer.addAtom({elem: 'C', x: 1, y: 0, z: 0});
+                viewer.addAtom({elem: 'C', x: 0, y: 0, z: 0});
+                viewer.addAtom({elem: 'O', x: -1, y: 0, z: 0});
+                viewer.addAtom({elem: 'H', x: 1.5, y: 0.5, z: 0.5});
+                viewer.addAtom({elem: 'H', x: 1.5, y: -0.5, z: -0.5});
+                viewer.addAtom({elem: 'H', x: 1.5, y: 0, z: -1});
+                viewer.addAtom({elem: 'H', x: 0, y: 1, z: 0});
+                viewer.addAtom({elem: 'H', x: 0, y: -1, z: 0});
+                viewer.addAtom({elem: 'H', x: -1.5, y: 0, z: 0});
+                
+                // Add bonds
+                const bonds = [[0,1], [1,2], [0,3], [0,4], [0,5], [1,6], [1,7], [2,8]];
+                bonds.forEach(bond => {
+                    viewer.addBond({from: bond[0], to: bond[1], order: 1});
+                });
+                
+                applyCurrentStyle();
+                viewer.zoomTo();
+                viewer.render();
+                
+                log('✅ Ethanol molecule loaded successfully', 'success');
+                
+            } catch (error) {
+                log('❌ Error loading ethanol: ' + error.message, 'error');
+            }
+        }
+        
+        function loadCaffeine() {
+            if (!viewer) return;
+            
+            try {
+                log('Loading caffeine molecule...', 'info');
+                viewer.clear();
+                
+                // Caffeine structure (simplified)
+                const atoms = [
+                    ['C', 0.0, 0.0, 0.0], ['N', 1.4, 0.0, 0.0], ['C', 2.1, 1.2, 0.0],
+                    ['N', 1.4, 2.4, 0.0], ['C', 0.0, 2.4, 0.0], ['C', -0.7, 1.2, 0.0],
+                    ['C', -2.1, 1.2, 0.0], ['O', -2.8, 2.4, 0.0], ['N', -2.8, 0.0, 0.0],
+                    ['C', -2.1, -1.2, 0.0], ['O', -2.8, -2.4, 0.0], ['N', -0.7, -1.2, 0.0],
+                    ['C', 2.1, 3.6, 0.0], ['C', -4.2, 0.0, 0.0], ['C', 0.0, -2.4, 0.0]
+                ];
+                
+                atoms.forEach((atom, i) => {
+                    viewer.addAtom({elem: atom[0], x: atom[1], y: atom[2], z: atom[3], serial: i});
+                });
+                
+                const bonds = [
+                    [0,1], [1,2], [2,3], [3,4], [4,5], [5,0], [5,6], [6,7], [6,8],
+                    [8,9], [9,10], [9,11], [11,0], [3,12], [8,13], [11,14]
+                ];
+                
+                bonds.forEach(bond => {
+                    viewer.addBond({from: bond[0], to: bond[1], order: 1});
+                });
+                
+                applyCurrentStyle();
+                viewer.zoomTo();
+                viewer.render();
+                
+                log('✅ Caffeine molecule loaded successfully', 'success');
+                
+            } catch (error) {
+                log('❌ Error loading caffeine: ' + error.message, 'error');
+            }
+        }
+        
+        function loadAspirin() {
+            if (!viewer) return;
+            
+            try {
+                log('Loading aspirin molecule...', 'info');
+                viewer.clear();
+                
+                // Simplified aspirin structure
+                const atoms = [
+                    ['C', 0, 0, 0], ['C', 1.2, 0.7, 0], ['C', 2.4, 0, 0], ['C', 2.4, -1.4, 0],
+                    ['C', 1.2, -2.1, 0], ['C', 0, -1.4, 0], ['C', 3.6, 0.7, 0], ['O', 4.8, 0, 0],
+                    ['O', 3.6, 2.1, 0], ['O', -1.2, -2.1, 0], ['C', -2.4, -1.4, 0], ['O', -3.6, -2.1, 0],
+                    ['C', -2.4, 0, 0]
+                ];
+                
+                atoms.forEach((atom, i) => {
+                    viewer.addAtom({elem: atom[0], x: atom[1], y: atom[2], z: atom[3], serial: i});
+                });
+                
+                const bonds = [
+                    [0,1], [1,2], [2,3], [3,4], [4,5], [5,0], [2,6], [6,7], [6,8],
+                    [5,9], [9,10], [10,11], [10,12]
+                ];
+                
+                bonds.forEach(bond => {
+                    viewer.addBond({from: bond[0], to: bond[1], order: 1});
+                });
+                
+                applyCurrentStyle();
+                viewer.zoomTo();
+                viewer.render();
+                
+                log('✅ Aspirin molecule loaded successfully', 'success');
+                
+            } catch (error) {
+                log('❌ Error loading aspirin: ' + error.message, 'error');
+            }
+        }
+        
+        function loadDNA() {
+            if (!viewer) return;
+            
+            try {
+                log('Loading DNA fragment...', 'info');
+                viewer.clear();
+                
+                // Simple DNA base pair (AT)
+                const atoms = [
+                    // Adenine
+                    ['N', 0, 0, 0], ['C', 1.4, 0, 0], ['N', 2.1, 1.2, 0], ['C', 1.4, 2.4, 0],
+                    ['C', 0, 2.4, 0], ['C', -0.7, 1.2, 0], ['N', -2.1, 1.2, 0], ['C', -2.8, 0, 0],
+                    ['N', -2.1, -1.2, 0],
+                    // Thymine (offset)
+                    ['N', 5, 0, 0], ['C', 6.4, 0, 0], ['C', 7.1, 1.2, 0], ['N', 6.4, 2.4, 0],
+                    ['C', 5, 2.4, 0], ['C', 4.3, 1.2, 0], ['O', 3.6, 0, 0], ['C', 8.5, 1.2, 0]
+                ];
+                
+                atoms.forEach((atom, i) => {
+                    viewer.addAtom({elem: atom[0], x: atom[1], y: atom[2], z: atom[3], serial: i});
+                });
+                
+                const bonds = [
+                    // Adenine
+                    [0,1], [1,2], [2,3], [3,4], [4,5], [5,0], [5,6], [6,7], [7,8], [8,0],
+                    // Thymine
+                    [9,10], [10,11], [11,12], [12,13], [13,14], [14,9], [14,15], [11,16],
+                    // Hydrogen bonds between bases
+                    [2,13], [6,15]
+                ];
+                
+                bonds.forEach(bond => {
+                    viewer.addBond({from: bond[0], to: bond[1], order: 1});
+                });
+                
+                applyCurrentStyle();
+                viewer.zoomTo();
+                viewer.render();
+                
+                log('✅ DNA fragment loaded successfully', 'success');
+                
+            } catch (error) {
+                log('❌ Error loading DNA: ' + error.message, 'error');
+            }
+        }
+        
+        function applyCurrentStyle() {
+            const style = document.getElementById('styleSelect').value;
+            const color = document.getElementById('colorSelect').value;
+            
+            switch(style) {
+                case 'sphere':
+                    viewer.setStyle({}, {sphere: {radius: 0.3}, stick: {radius: 0.15}});
+                    break;
+                case 'stick':
+                    viewer.setStyle({}, {stick: {radius: 0.2}});
+                    break;
+                case 'line':
+                    viewer.setStyle({}, {line: {linewidth: 3}});
+                    break;
+                case 'cartoon':
+                    viewer.setStyle({}, {cartoon: {color: 'spectrum'}});
+                    break;
+            }
+        }
+        
+        function changeStyle() {
+            if (!viewer) return;
+            applyCurrentStyle();
+            viewer.render();
+            log('Style changed to: ' + document.getElementById('styleSelect').value, 'info');
+        }
+        
+        function changeColor() {
+            if (!viewer) return;
+            applyCurrentStyle();
+            viewer.render();
+            log('Color scheme changed to: ' + document.getElementById('colorSelect').value, 'info');
+        }
+        
+        function startRotation() {
+            if (!viewer || isRotating) return;
+            
+            isRotating = true;
+            rotationInterval = setInterval(() => {
+                viewer.rotate(2, 'y');
+                viewer.render();
+            }, 50);
+            
+            log('🔄 Auto rotation started', 'info');
+        }
+        
+        function stopRotation() {
+            if (rotationInterval) {
+                clearInterval(rotationInterval);
+                rotationInterval = null;
+            }
+            isRotating = false;
+            log('⏹️ Auto rotation stopped', 'info');
+        }
+        
+        function resetView() {
+            if (!viewer) return;
+            
+            stopRotation();
+            viewer.zoomTo();
+            viewer.render();
+            log('🎯 View reset to default', 'info');
+        }
+        
+        function clearViewer() {
+            if (!viewer) return;
+            
+            try {
+                stopRotation();
+                viewer.clear();
+                viewer.render();
+                log('🗑️ Viewer cleared', 'info');
+            } catch (error) {
+                log('❌ Error clearing viewer: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -135,7 +135,7 @@ function generatePlaceholder3DCoordinates($smiles) {
     <link href="../assets/css/style.css" rel="stylesheet">
     
     <!-- 3D Molecular Visualization Libraries -->
-    <script src="https://unpkg.com/3dmol@latest/build/3Dmol-min.js"></script>
+    <script src="../assets/js/3Dmol.js"></script>
     
     <style>
         .molecule-viewer {

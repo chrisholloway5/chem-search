@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3DMol.js Test</title>
+    <script src="https://unpkg.com/3dmol@latest/build/3Dmol-min.js"></script>
+    <style>
+        #viewer {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #ccc;
+            margin: 20px auto;
+            display: block;
+        }
+        .test-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>3DMol.js Library Test</h1>
+        
+        <div id="status" class="status warning">Testing...</div>
+        
+        <div id="viewer"></div>
+        
+        <button onclick="loadWater()">Load Water Molecule</button>
+        <button onclick="loadEthanol()">Load Ethanol</button>
+        <button onclick="clearViewer()">Clear</button>
+        
+        <div id="console-log" style="margin-top: 20px; text-align: left; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+            <h3>Console Log:</h3>
+            <div id="log-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let viewer;
+        
+        function log(message) {
+            console.log(message);
+            const logContent = document.getElementById('log-content');
+            logContent.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+        
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded');
+            
+            // Check if 3DMol is available
+            if (typeof $3Dmol !== 'undefined') {
+                log('3DMol.js library loaded successfully');
+                updateStatus('3DMol.js library loaded successfully', 'success');
+                
+                try {
+                    // Initialize viewer
+                    const element = document.getElementById('viewer');
+                    viewer = $3Dmol.createViewer(element, {
+                        backgroundColor: 'white'
+                    });
+                    
+                    log('3D viewer created successfully');
+                    updateStatus('3D viewer initialized and ready', 'success');
+                    
+                    // Load a simple molecule by default
+                    loadWater();
+                    
+                } catch (error) {
+                    log('Error creating viewer: ' + error.message);
+                    updateStatus('Error creating 3D viewer: ' + error.message, 'error');
+                }
+                
+            } else {
+                log('3DMol.js library not found');
+                updateStatus('3DMol.js library failed to load', 'error');
+            }
+        });
+        
+        function loadWater() {
+            if (!viewer) {
+                log('Viewer not initialized');
+                return;
+            }
+            
+            try {
+                log('Loading water molecule...');
+                
+                viewer.clear();
+                
+                // Add water atoms
+                viewer.addAtom({elem: 'O', x: 0, y: 0, z: 0});
+                viewer.addAtom({elem: 'H', x: 0.76, y: 0.59, z: 0});
+                viewer.addAtom({elem: 'H', x: -0.76, y: 0.59, z: 0});
+                
+                // Add bonds
+                viewer.addBond({from: 0, to: 1, order: 1});
+                viewer.addBond({from: 0, to: 2, order: 1});
+                
+                // Set style
+                viewer.setStyle({}, {sphere: {radius: 0.3}, stick: {radius: 0.15}});
+                
+                // Render
+                viewer.zoomTo();
+                viewer.render();
+                
+                log('Water molecule loaded successfully');
+                
+            } catch (error) {
+                log('Error loading water: ' + error.message);
+            }
+        }
+        
+        function loadEthanol() {
+            if (!viewer) {
+                log('Viewer not initialized');
+                return;
+            }
+            
+            try {
+                log('Loading ethanol molecule...');
+                
+                viewer.clear();
+                
+                // Add ethanol atoms
+                viewer.addAtom({elem: 'C', x: 1, y: 0, z: 0});
+                viewer.addAtom({elem: 'C', x: 0, y: 0, z: 0});
+                viewer.addAtom({elem: 'O', x: -1, y: 0, z: 0});
+                viewer.addAtom({elem: 'H', x: 1.5, y: 0.5, z: 0.5});
+                viewer.addAtom({elem: 'H', x: 1.5, y: -0.5, z: -0.5});
+                viewer.addAtom({elem: 'H', x: 1.5, y: 0, z: -1});
+                viewer.addAtom({elem: 'H', x: 0, y: 1, z: 0});
+                viewer.addAtom({elem: 'H', x: 0, y: -1, z: 0});
+                viewer.addAtom({elem: 'H', x: -1.5, y: 0, z: 0});
+                
+                // Add bonds
+                viewer.addBond({from: 0, to: 1, order: 1});
+                viewer.addBond({from: 1, to: 2, order: 1});
+                viewer.addBond({from: 0, to: 3, order: 1});
+                viewer.addBond({from: 0, to: 4, order: 1});
+                viewer.addBond({from: 0, to: 5, order: 1});
+                viewer.addBond({from: 1, to: 6, order: 1});
+                viewer.addBond({from: 1, to: 7, order: 1});
+                viewer.addBond({from: 2, to: 8, order: 1});
+                
+                // Set style
+                viewer.setStyle({}, {sphere: {radius: 0.25}, stick: {radius: 0.15}});
+                
+                // Render
+                viewer.zoomTo();
+                viewer.render();
+                
+                log('Ethanol molecule loaded successfully');
+                
+            } catch (error) {
+                log('Error loading ethanol: ' + error.message);
+            }
+        }
+        
+        function clearViewer() {
+            if (!viewer) {
+                log('Viewer not initialized');
+                return;
+            }
+            
+            try {
+                viewer.clear();
+                viewer.render();
+                log('Viewer cleared');
+            } catch (error) {
+                log('Error clearing viewer: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

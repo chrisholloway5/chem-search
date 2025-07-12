@@ -198,3 +198,79 @@
 [2025-07-12 04:48:01] Database initialization failed: Database connection failed
 [2025-07-12 04:48:04] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
 [2025-07-12 04:48:04] Database initialization failed: Database connection failed
+[2025-07-12 04:49:10] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:49:10] Database initialization failed: Database connection failed
+[2025-07-12 04:49:15] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:49:15] Database initialization failed: Database connection failed
+[2025-07-12 04:49:19] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:49:19] Database initialization failed: Database connection failed
+[2025-07-12 04:49:23] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:49:23] Database initialization failed: Database connection failed
+[2025-07-12 04:52:11] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:52:11] Database initialization failed: Database connection failed
+[2025-07-12 04:56:33] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:56:33] Database initialization failed: Database connection failed
+[2025-07-12 04:56:43] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:56:43] Database initialization failed: Database connection failed
+[2025-07-12 04:56:59] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:56:59] Database initialization failed: Database connection failed
+[2025-07-12 04:58:54] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:58:54] Database initialization failed: Database connection failed
+[2025-07-12 04:59:35] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:59:35] Database initialization failed: Database connection failed
+[2025-07-12 04:59:39] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:59:39] Database initialization failed: Database connection failed
+[2025-07-12 04:59:42] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:59:42] Database initialization failed: Database connection failed
+[2025-07-12 04:59:47] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:59:47] Database initialization failed: Database connection failed
+[2025-07-12 04:59:52] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 04:59:52] Database initialization failed: Database connection failed
+[2025-07-12 05:03:06] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:03:06] Database initialization failed: Database connection failed
+[2025-07-12 05:05:03] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:05:03] Database initialization failed: Database connection failed
+[2025-07-12 05:05:28] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:05:28] Database initialization failed: Database connection failed
+[2025-07-12 05:05:43] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:05:43] Database initialization failed: Database connection failed
+[2025-07-12 05:05:49] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:05:49] Database initialization failed: Database connection failed
+[2025-07-12 05:06:01] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:06:01] Database initialization failed: Database connection failed
+[2025-07-12 05:06:15] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:06:15] Database initialization failed: Database connection failed
+[2025-07-12 05:06:50] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:06:50] Database initialization failed: Database connection failed
+[2025-07-12 05:07:23] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:07:23] Database initialization failed: Database connection failed
+[2025-07-12 05:07:38] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:07:38] Database initialization failed: Database connection failed
+[2025-07-12 05:09:48] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:09:48] Database initialization failed: Database connection failed
+[2025-07-12 05:09:58] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:09:58] Database initialization failed: Database connection failed
+[2025-07-12 05:10:09] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:10:09] Database initialization failed: Database connection failed
+[2025-07-12 05:10:15] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:10:15] Database initialization failed: Database connection failed
+[2025-07-12 05:10:34] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:10:34] Database initialization failed: Database connection failed
+[2025-07-12 05:10:40] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:10:40] Database initialization failed: Database connection failed
+[2025-07-12 05:11:08] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:11:08] Database initialization failed: Database connection failed
+[2025-07-12 05:11:22] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:11:22] Database initialization failed: Database connection failed
+[2025-07-12 05:11:35] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:11:35] Database initialization failed: Database connection failed
+[2025-07-12 05:16:46] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:16:46] Database initialization failed: Database connection failed
+[2025-07-12 05:17:08] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:17:08] Database initialization failed: Database connection failed
+[2025-07-12 05:17:28] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:17:28] Database initialization failed: Database connection failed
+[2025-07-12 05:17:30] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:17:30] Database initialization failed: Database connection failed
+[2025-07-12 05:17:35] Database connection failed: SQLSTATE[HY000] [1049] Unknown database 'chem_search'
+[2025-07-12 05:17:35] Database initialization failed: Database connection failed

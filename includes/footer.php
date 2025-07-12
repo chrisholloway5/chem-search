@@ -30,7 +30,7 @@ if (basename($current_dir) === 'tools') {
                 <ul class="list-unstyled">
                     <li><a href="<?php echo $base_path; ?>about.php" class="text-light">About Chem</a></li>
                     <li><a href="<?php echo $base_path; ?>api_status.php" class="text-light">API Status</a></li>
-                    <li><a href="https://github.com/ur-whitelab/chemcrow-public" target="_blank" class="text-light">
+                    <li><a href="https://github.com/chrisholloway5/chem-search" target="_blank" class="text-light">
                         <i class="fab fa-github"></i> GitHub
                     </a></li>
                     <li><a href="https://arxiv.org/abs/2304.05376" target="_blank" class="text-light">

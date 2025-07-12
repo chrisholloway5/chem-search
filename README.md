@@ -699,6 +699,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   </p>
   <p>
     <a href="https://github.com/orgs/Progressiverobot">🏢 Progressive Robot Ltd</a> |
-    <a href="mailto:christopher@progressiverobot.com">📧 Contact Us</a>
+    <a href="mailto:chris.holloway@progressiverobot.com">📧 Contact Us</a>
   </p>
 </div>

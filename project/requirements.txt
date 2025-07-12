@@ -7,6 +7,10 @@ openai>=0.27.8
 langchain>=0.0.234,<=0.0.275
 tiktoken
 
+# Natural Language Processing
+nltk>=3.8
+spacy>=3.4.0
+
 # Web and Data Processing
 requests>=2.20
 python-dotenv>=1.0.0
@@ -24,6 +28,11 @@ rxn4chemistry
 # Research and Literature
 paper-qa>=1.1.1
 pypdf
+arxiv>=1.4.0
+
+# XML and Data Processing
+lxml>=4.9.0
+beautifulsoup4>=4.11.0
 
 # Utilities
 nest-asyncio

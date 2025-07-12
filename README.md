@@ -250,7 +250,7 @@ Chem-search/
 ### Frontend
 - **Bootstrap 5**: Responsive UI framework
 - **JavaScript (ES6+)**: Interactive functionality
-- **Font Awesome**: Icons and visual elements
+- **Font Awesome 6.4.0**: Icons and visual elements (CDN)
 - **CSS3**: Custom styling and animations
 
 ### Integrations

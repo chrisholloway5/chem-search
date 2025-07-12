@@ -131,7 +131,7 @@ function generatePlaceholder3DCoordinates($smiles) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Structure Viewer - ChemSearch</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
     
     <!-- 3D Molecular Visualization Libraries -->
@@ -194,7 +194,12 @@ function generatePlaceholder3DCoordinates($smiles) {
         #viewer-3d {
             width: 100%;
             height: 540px;
+            min-height: 540px;
             background: radial-gradient(circle at center, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
         }
         
         .feature-badge {
@@ -700,6 +705,15 @@ function generatePlaceholder3DCoordinates($smiles) {
             // Setup form validation first
             setupFormValidation();
             
+            // Wait for all resources to load before initializing viewer
+            if (document.readyState === 'complete') {
+                initViewer();
+            } else {
+                window.addEventListener('load', initViewer);
+            }
+        });
+
+        function initViewer() {
             // Check if 3DMol is available
             if (typeof $3Dmol === 'undefined') {
                 console.error('3DMol.js library not loaded');
@@ -707,24 +721,46 @@ function generatePlaceholder3DCoordinates($smiles) {
                 return;
             }
             
-            // Always initialize viewer if we have the container
-            const viewerContainer = document.getElementById('viewer-3d');
-            if (viewerContainer) {
-                initializeViewer();
-                
-                <?php if ($moleculeData && !isset($moleculeData['error'])): ?>
-                // Load molecule data if available
-                loadMoleculeData();
-                <?php else: ?>
-                // Load a default molecule for demonstration
-                loadDefaultMolecule();
-                <?php endif; ?>
-            }
-        });
+            // Wait a moment for DOM to settle, then initialize
+            setTimeout(() => {
+                const viewerContainer = document.getElementById('viewer-3d');
+                if (viewerContainer) {
+                    // Ensure container has dimensions
+                    const containerRect = viewerContainer.getBoundingClientRect();
+                    if (containerRect.width === 0 || containerRect.height === 0) {
+                        console.warn('Viewer container has no dimensions, retrying in 100ms');
+                        setTimeout(initViewer, 100);
+                        return;
+                    }
+                    
+                    initializeViewer();
+                    
+                    <?php if ($moleculeData && !isset($moleculeData['error'])): ?>
+                    // Load molecule data if available
+                    loadMoleculeData();
+                    <?php else: ?>
+                    // Load a default molecule for demonstration
+                    loadDefaultMolecule();
+                    <?php endif; ?>
+                }
+            }, 100);
+        }
         
         function initializeViewer() {
             try {
                 console.log('Initializing 3D viewer...');
+                
+                // Check for WebGL support
+                if (!window.WebGLRenderingContext) {
+                    throw new Error('WebGL is not supported by this browser');
+                }
+                
+                // Test WebGL context
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) {
+                    throw new Error('WebGL context could not be created');
+                }
                 
                 // Initialize 3DMol.js viewer
                 const element = document.getElementById('viewer-3d');
@@ -733,20 +769,58 @@ function generatePlaceholder3DCoordinates($smiles) {
                     return;
                 }
                 
+                // Get container dimensions
+                const containerRect = element.getBoundingClientRect();
+                const width = Math.max(containerRect.width, 400);
+                const height = 540;
+                
+                // Ensure element has explicit dimensions
+                element.style.width = width + 'px';
+                element.style.height = height + 'px';
+                
                 const config = { 
                     backgroundColor: 'white',
-                    width: element.offsetWidth,
-                    height: 540
+                    width: width,
+                    height: height,
+                    antialias: true,
+                    camerax: 0,
+                    cameray: 0,
+                    cameraz: 50
                 };
                 
+                console.log('Creating viewer with config:', config);
                 viewer = $3Dmol.createViewer(element, config);
-                console.log('3D viewer created successfully');
+                
+                // Wait for viewer to be ready
+                if (viewer) {
+                    console.log('3D viewer created successfully');
+                    
+                    // Force a resize to ensure proper canvas dimensions
+                    setTimeout(() => {
+                        if (viewer.resize) {
+                            viewer.resize();
+                        }
+                    }, 50);
+                } else {
+                    throw new Error('Failed to create 3DMol viewer');
+                }
                 
                 // Hide loading spinner
                 const spinner = element.querySelector('.loading-spinner');
                 if (spinner) {
                     spinner.style.display = 'none';
                 }
+                
+                // Add window resize handler
+                window.addEventListener('resize', function() {
+                    if (viewer && viewer.resize) {
+                        setTimeout(() => {
+                            const newWidth = Math.max(element.getBoundingClientRect().width, 400);
+                            element.style.width = newWidth + 'px';
+                            viewer.resize();
+                        }, 100);
+                    }
+                });
                 
                 return true;
             } catch (error) {
@@ -771,45 +845,24 @@ function generatePlaceholder3DCoordinates($smiles) {
                 // Clear existing models
                 viewer.clear();
                 
-                // Create atoms and bonds from coordinate data
-                const atoms = moleculeData.atoms;
-                const atomIds = [];
-                
-                // Add atoms
-                atoms.forEach((atom, index) => {
-                    const [element, x, y, z] = atom;
-                    viewer.addAtom({
-                        elem: element,
-                        x: x,
-                        y: y,
-                        z: z,
-                        serial: index
+                // Create molecule from atom coordinates
+                if (moleculeData.atoms && moleculeData.atoms.length > 0) {
+                    // Convert atom data to XYZ format
+                    let xyzData = moleculeData.atoms.length + "\n";
+                    xyzData += "Generated from " + (moleculeData.smiles || "unknown") + "\n";
+                    
+                    moleculeData.atoms.forEach(atom => {
+                        const [element, x, y, z] = atom;
+                        xyzData += element + " " + x + " " + y + " " + z + "\n";
                     });
-                    atomIds.push(index);
-                });
-                
-                // Add bonds between nearby atoms (simplified bonding)
-                for (let i = 0; i < atomIds.length; i++) {
-                    for (let j = i + 1; j < atomIds.length; j++) {
-                        const atom1 = atoms[i];
-                        const atom2 = atoms[j];
-                        const distance = calculateDistance(atom1, atom2);
-                        
-                        // Simple bonding rules based on distance
-                        if (distance < 2.0) {
-                            viewer.addBond({
-                                from: i,
-                                to: j,
-                                order: 1
-                            });
-                        }
-                    }
+                    
+                    viewer.addModel(xyzData, "xyz");
+                } else {
+                    showAlert('No molecular coordinate data found.', 'danger');
+                    return;
                 }
                 
-                // Set initial style
                 setStyle('sphere');
-                
-                // Center and zoom to fit
                 viewer.zoomTo();
                 viewer.render();
                 
@@ -833,56 +886,28 @@ function generatePlaceholder3DCoordinates($smiles) {
                 // Clear existing models
                 viewer.clear();
                 
-                // Add caffeine molecule atoms (simplified structure)
-                const caffeineAtoms = [
-                    ['C', 0.0, 0.0, 0.0],
-                    ['N', 1.4, 0.0, 0.0],
-                    ['C', 2.1, 1.2, 0.0],
-                    ['N', 1.4, 2.4, 0.0],
-                    ['C', 0.0, 2.4, 0.0],
-                    ['C', -0.7, 1.2, 0.0],
-                    ['C', -2.1, 1.2, 0.0],
-                    ['O', -2.8, 2.4, 0.0],
-                    ['N', -2.8, 0.0, 0.0],
-                    ['C', -2.1, -1.2, 0.0],
-                    ['O', -2.8, -2.4, 0.0],
-                    ['N', -0.7, -1.2, 0.0],
-                    ['C', 2.1, 3.6, 0.0],
-                    ['C', -4.2, 0.0, 0.0],
-                    ['C', 0.0, -2.4, 0.0]
-                ];
+                // Create caffeine molecule using XYZ format
+                const caffeineXYZ = `15
+Caffeine molecule
+C 0.0 0.0 0.0
+N 1.4 0.0 0.0
+C 2.1 1.2 0.0
+N 1.4 2.4 0.0
+C 0.0 2.4 0.0
+C -0.7 1.2 0.0
+C -2.1 1.2 0.0
+O -2.8 2.4 0.0
+N -2.8 0.0 0.0
+C -2.1 -1.2 0.0
+O -2.8 -2.4 0.0
+N -0.7 -1.2 0.0
+C 2.1 3.6 0.0
+C -4.2 0.0 0.0
+C 0.0 -2.4 0.0`;
                 
-                // Add atoms
-                caffeineAtoms.forEach((atom, index) => {
-                    const [element, x, y, z] = atom;
-                    viewer.addAtom({
-                        elem: element,
-                        x: x,
-                        y: y,
-                        z: z,
-                        serial: index
-                    });
-                });
+                viewer.addModel(caffeineXYZ, "xyz");
                 
-                // Add bonds (simplified caffeine structure)
-                const bonds = [
-                    [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0],
-                    [5, 6], [6, 7], [6, 8], [8, 9], [9, 10], [9, 11],
-                    [11, 0], [3, 12], [8, 13], [11, 14]
-                ];
-                
-                bonds.forEach(bond => {
-                    viewer.addBond({
-                        from: bond[0],
-                        to: bond[1],
-                        order: 1
-                    });
-                });
-                
-                // Set initial style
                 setStyle('sphere');
-                
-                // Center and zoom to fit
                 viewer.zoomTo();
                 viewer.render();
                 
@@ -891,6 +916,87 @@ function generatePlaceholder3DCoordinates($smiles) {
             } catch (error) {
                 console.error('Error loading default molecule:', error);
                 showAlert('Failed to load default molecule: ' + error.message, 'danger');
+            }
+        }
+        
+        function loadExampleMolecule(smiles) {
+            if (!viewer) {
+                console.error('Viewer not initialized');
+                return;
+            }
+            
+            try {
+                console.log('Loading example molecule:', smiles);
+                
+                // Clear existing models
+                viewer.clear();
+                
+                // Define example molecules in XYZ format
+                const molecules = {
+                    'O': `3
+Water molecule
+O 0.0 0.0 0.0
+H 0.76 0.59 0.0
+H -0.76 0.59 0.0`,
+                    'CCO': `9
+Ethanol molecule
+C 1.0 0.0 0.0
+C 0.0 0.0 0.0
+O -1.0 0.0 0.0
+H 1.5 0.5 0.5
+H 1.5 -0.5 -0.5
+H 1.5 0.0 -1.0
+H 0.0 1.0 0.0
+H 0.0 -1.0 0.0
+H -1.5 0.0 0.0`,
+                    'CC(=O)O': `8
+Acetic acid molecule
+C 1.0 0.0 0.0
+C 0.0 0.0 0.0
+O -0.5 1.0 0.0
+O -0.5 -1.0 0.0
+H 1.5 0.5 0.5
+H 1.5 -0.5 -0.5
+H 1.5 0.0 -1.0
+H -1.0 -1.5 0.0`,
+                    'CN1C=NC2=C1C(=O)N(C(=O)N2C)C': `15
+Caffeine molecule
+C 0.0 0.0 0.0
+N 1.4 0.0 0.0
+C 2.1 1.2 0.0
+N 1.4 2.4 0.0
+C 0.0 2.4 0.0
+C -0.7 1.2 0.0
+C -2.1 1.2 0.0
+O -2.8 2.4 0.0
+N -2.8 0.0 0.0
+C -2.1 -1.2 0.0
+O -2.8 -2.4 0.0
+N -0.7 -1.2 0.0
+C 2.1 3.6 0.0
+C -4.2 0.0 0.0
+C 0.0 -2.4 0.0`
+                };
+                
+                const moleculeXYZ = molecules[smiles];
+                if (!moleculeXYZ) {
+                    console.warn('Molecule not found in predefined set, loading default');
+                    loadDefaultMolecule();
+                    return;
+                }
+                
+                viewer.addModel(moleculeXYZ, "xyz");
+                
+                setStyle('sphere');
+                viewer.zoomTo();
+                viewer.render();
+                
+                console.log('Example molecule loaded successfully');
+                showAlert('Molecule loaded: ' + smiles, 'success');
+                
+            } catch (error) {
+                console.error('Error loading example molecule:', error);
+                showAlert('Failed to load example molecule: ' + error.message, 'danger');
             }
         }
         
@@ -980,18 +1086,29 @@ function generatePlaceholder3DCoordinates($smiles) {
         function toggleLabels(show) {
             if (!viewer) return;
             
-            if (show) {
-                viewer.addLabels({}, {
-                    fontSize: 12,
-                    fontColor: 'black',
-                    backgroundColor: 'white',
-                    backgroundOpacity: 0.8
-                });
-            } else {
-                viewer.removeAllLabels();
+            try {
+                if (show) {
+                    // Add atom labels using 3DMol.js API
+                    const atoms = viewer.getModel().selectedAtoms({});
+                    atoms.forEach((atom, index) => {
+                        viewer.addLabel(atom.elem, {
+                            position: atom,
+                            fontSize: 12,
+                            fontColor: 'black',
+                            backgroundColor: 'white',
+                            backgroundOpacity: 0.8
+                        });
+                    });
+                } else {
+                    // Remove all labels
+                    viewer.removeAllLabels();
+                }
+                
+                viewer.render();
+            } catch (error) {
+                console.warn('Label functionality not fully supported:', error);
+                // Silently fail - labels are optional
             }
-            
-            viewer.render();
         }
         
         function resetView() {
@@ -1046,13 +1163,14 @@ function generatePlaceholder3DCoordinates($smiles) {
             }
             
             try {
-                const canvas = viewer.pngURI();
-                const link = document.createElement('a');
-                link.download = 'molecule_3d.png';
-                link.href = canvas;
-                link.click();
-                
-                showAlert('PNG export successful', 'success');
+                viewer.render(); // Ensure rendering is complete
+                viewer.pngURI(null, null, null, null, function(uri) {
+                    const link = document.createElement('a');
+                    link.download = 'molecule_3d.png';
+                    link.href = uri;
+                    link.click();
+                    showAlert('PNG export successful', 'success');
+                });
             } catch (error) {
                 showAlert('PNG export failed: ' + error.message, 'danger');
             }
@@ -1094,98 +1212,62 @@ function generatePlaceholder3DCoordinates($smiles) {
                 // Clear existing models
                 viewer.clear();
                 
-                // Define some common molecules with their 3D coordinates
+                // Define example molecules in XYZ format
                 const molecules = {
-                    'O': { // Water
-                        atoms: [
-                            ['O', 0.0, 0.0, 0.0],
-                            ['H', 0.76, 0.59, 0.0],
-                            ['H', -0.76, 0.59, 0.0]
-                        ],
-                        bonds: [[0, 1], [0, 2]]
-                    },
-                    'CCO': { // Ethanol
-                        atoms: [
-                            ['C', 1.0, 0.0, 0.0],
-                            ['C', 0.0, 0.0, 0.0],
-                            ['O', -1.0, 0.0, 0.0],
-                            ['H', 1.5, 0.5, 0.5],
-                            ['H', 1.5, -0.5, -0.5],
-                            ['H', 1.5, 0.0, -1.0],
-                            ['H', 0.0, 1.0, 0.0],
-                            ['H', 0.0, -1.0, 0.0],
-                            ['H', -1.5, 0.0, 0.0]
-                        ],
-                        bonds: [[0, 1], [1, 2], [0, 3], [0, 4], [0, 5], [1, 6], [1, 7], [2, 8]]
-                    },
-                    'CC(=O)O': { // Acetic Acid
-                        atoms: [
-                            ['C', 1.0, 0.0, 0.0],
-                            ['C', 0.0, 0.0, 0.0],
-                            ['O', -0.5, 1.0, 0.0],
-                            ['O', -0.5, -1.0, 0.0],
-                            ['H', 1.5, 0.5, 0.5],
-                            ['H', 1.5, -0.5, -0.5],
-                            ['H', 1.5, 0.0, -1.0],
-                            ['H', -1.0, -1.5, 0.0]
-                        ],
-                        bonds: [[0, 1], [1, 2], [1, 3], [0, 4], [0, 5], [0, 6], [3, 7]]
-                    },
-                    'CN1C=NC2=C1C(=O)N(C(=O)N2C)C': { // Caffeine
-                        atoms: [
-                            ['C', 0.0, 0.0, 0.0],
-                            ['N', 1.4, 0.0, 0.0],
-                            ['C', 2.1, 1.2, 0.0],
-                            ['N', 1.4, 2.4, 0.0],
-                            ['C', 0.0, 2.4, 0.0],
-                            ['C', -0.7, 1.2, 0.0],
-                            ['C', -2.1, 1.2, 0.0],
-                            ['O', -2.8, 2.4, 0.0],
-                            ['N', -2.8, 0.0, 0.0],
-                            ['C', -2.1, -1.2, 0.0],
-                            ['O', -2.8, -2.4, 0.0],
-                            ['N', -0.7, -1.2, 0.0],
-                            ['C', 2.1, 3.6, 0.0],
-                            ['C', -4.2, 0.0, 0.0],
-                            ['C', 0.0, -2.4, 0.0]
-                        ],
-                        bonds: [
-                            [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0],
-                            [5, 6], [6, 7], [6, 8], [8, 9], [9, 10], [9, 11],
-                            [11, 0], [3, 12], [8, 13], [11, 14]
-                        ]
-                    }
+                    'O': `3
+Water molecule
+O 0.0 0.0 0.0
+H 0.76 0.59 0.0
+H -0.76 0.59 0.0`,
+                    'CCO': `9
+Ethanol molecule
+C 1.0 0.0 0.0
+C 0.0 0.0 0.0
+O -1.0 0.0 0.0
+H 1.5 0.5 0.5
+H 1.5 -0.5 -0.5
+H 1.5 0.0 -1.0
+H 0.0 1.0 0.0
+H 0.0 -1.0 0.0
+H -1.5 0.0 0.0`,
+                    'CC(=O)O': `8
+Acetic acid molecule
+C 1.0 0.0 0.0
+C 0.0 0.0 0.0
+O -0.5 1.0 0.0
+O -0.5 -1.0 0.0
+H 1.5 0.5 0.5
+H 1.5 -0.5 -0.5
+H 1.5 0.0 -1.0
+H -1.0 -1.5 0.0`,
+                    'CN1C=NC2=C1C(=O)N(C(=O)N2C)C': `15
+Caffeine molecule
+C 0.0 0.0 0.0
+N 1.4 0.0 0.0
+C 2.1 1.2 0.0
+N 1.4 2.4 0.0
+C 0.0 2.4 0.0
+C -0.7 1.2 0.0
+C -2.1 1.2 0.0
+O -2.8 2.4 0.0
+N -2.8 0.0 0.0
+C -2.1 -1.2 0.0
+O -2.8 -2.4 0.0
+N -0.7 -1.2 0.0
+C 2.1 3.6 0.0
+C -4.2 0.0 0.0
+C 0.0 -2.4 0.0`
                 };
                 
-                const molecule = molecules[smiles];
-                if (!molecule) {
-                    console.warn('Molecule not found in predefined set, using default');
+                const moleculeXYZ = molecules[smiles];
+                if (!moleculeXYZ) {
+                    console.warn('Molecule not found in predefined set, loading default');
                     loadDefaultMolecule();
                     return;
                 }
                 
-                // Add atoms
-                molecule.atoms.forEach((atom, index) => {
-                    const [element, x, y, z] = atom;
-                    viewer.addAtom({
-                        elem: element,
-                        x: x,
-                        y: y,
-                        z: z,
-                        serial: index
-                    });
-                });
+                viewer.addModel(moleculeXYZ, "xyz");
                 
-                // Add bonds
-                molecule.bonds.forEach(bond => {
-                    viewer.addBond({
-                        from: bond[0],
-                        to: bond[1],
-                        order: 1
-                    });
-                });
-                
-                // Set style and render
                 setStyle('sphere');
                 viewer.zoomTo();
                 viewer.render();

@@ -26,7 +26,7 @@ Chem-search is a comprehensive web-based chemistry platform that combines the po
 **Developed by Christopher Holloway**  
 🏢 **Progressive Robot Ltd**  
 🌐 **Organization**: [https://github.com/orgs/Progressiverobot](https://github.com/orgs/Progressiverobot)  
-📧 **Contact**: [chris.holloway@progressiverobot.comm](mailto:chris.holloway@progressiverobot.comm)  
+📧 **Contact**: [chris.holloway@progressiverobot.com](mailto:chris.holloway@progressiverobot.com)  
 💼 **LinkedIn**: [Christopher Holloway](https://linkedin.com/in/christopher-holloway)  
 
 ### About Progressive Robot Ltd
@@ -619,7 +619,7 @@ Before submitting feature requests:
 
 - **Questions**: Open a GitHub Discussion
 - **Bugs**: Create a detailed GitHub Issue
-- **Direct Contact**: [chris.holloway@progressiverobot.comm](mailto:chris.holloway@progressiverobot.comm)
+- **Direct Contact**: [chris.holloway@progressiverobot.com](mailto:chris.holloway@progressiverobot.com)
 - **Community**: Join our chemistry developer community
 
 ## 🐛 Troubleshooting

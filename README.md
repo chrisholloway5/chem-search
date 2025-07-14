@@ -685,7 +685,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/Progressiverobot/Chem-search/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Progressiverobot/Chem-search/discussions)
-- **Email**: [chris.holloway@progressiverobot.comm](mailto:chris.holloway@progressiverobot.comm)
+- **Email**: [chris.holloway@progressiverobot.com](mailto:chris.holloway@progressiverobot.com)
 - **Company**: [Progressive Robot Ltd](https://github.com/orgs/Progressiverobot)
 
 ---
